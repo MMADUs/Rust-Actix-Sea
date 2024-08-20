@@ -1,0 +1,15 @@
+[package]
+name = "Rust"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+actix-web = "4.3"
+sqlx = { version = "0.8.0", features = ["runtime-tokio-native-tls", "postgres", "chrono"] }
+serde = { version = "1.0", features = ["derive"] }
+tokio = { version = "1.0", features = ["full"] }
+dotenv = "0.15"
+chrono = { version = "0.4", features = ["serde"] }
+
+[build-dependencies]
+sqlx-cli = { version = "0.8.0", features = ["postgres"] }
