@@ -1,6 +1,7 @@
 use actix_web::{web, HttpResponse, Responder};
 use sqlx::PgPool;
-use crate::model::{CreateCategory, Category, UpdateCategory};
+
+use crate::internal::model::category_model::{CreateCategory, Category, UpdateCategory};
 
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(
@@ -31,7 +32,9 @@ async fn create_category(
     }
 }
 
-async fn get_categories(pool: web::Data<PgPool>) -> impl Responder {
+async fn get_categories(
+    pool: web::Data<PgPool>,
+) -> impl Responder {
     let result = sqlx::query_as!(
         Category,
         "SELECT id, name, created_at, updated_at FROM categories",
@@ -45,7 +48,10 @@ async fn get_categories(pool: web::Data<PgPool>) -> impl Responder {
     }
 }
 
-async fn get_category(pool: web::Data<PgPool>, id: web::Path<i32>) -> impl Responder {
+async fn get_category(
+    pool: web::Data<PgPool>,
+    id: web::Path<i32>,
+) -> impl Responder {
     let result = sqlx::query_as!(
         Category,
         "SELECT id, name, created_at, updated_at FROM categories WHERE id = $1",
@@ -75,7 +81,7 @@ async fn update_category(
         RETURNING id, name, created_at, updated_at
         "#,
         category.name,
-        *id
+        id.into_inner(),
     )
         .fetch_optional(pool.get_ref())
         .await;
