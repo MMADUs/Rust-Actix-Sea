@@ -1,19 +1,30 @@
+use std::time::Duration;
 use dotenv::dotenv;
-use sqlx::postgres::PgPoolOptions;
-use sqlx::{Pool, Postgres};
+use sea_orm::{ConnectOptions, Database, DatabaseConnection, DbErr};
 
-pub async fn connect_to_db() -> Result<Pool<Postgres>, sqlx::Error> {
+use migration::{Migrator, MigratorTrait};
+
+pub async fn connect_to_db() -> Result<DatabaseConnection, DbErr> {
     dotenv().ok();
 
-    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let database_url = std::env::var("DATABASE_URL")
+        .expect("DATABASE_URL must be set in env");
 
-    let pool = PgPoolOptions::new()
-        .max_connections(5)
-        .connect(&database_url)
-        .await
-        .expect("Failed to create pool");
+    let mut opt = ConnectOptions::new(database_url);
 
-    sqlx::migrate!("./migrations/").run(&pool).await?;
+    opt.max_connections(100)
+        .min_connections(5)
+        .connect_timeout(Duration::from_secs(8))
+        .acquire_timeout(Duration::from_secs(8))
+        .idle_timeout(Duration::from_secs(8))
+        .max_lifetime(Duration::from_secs(8))
+        .sqlx_logging(true)
+        .sqlx_logging_level(log::LevelFilter::Info);
 
-    Ok(pool)
+    let db_conn = Database::connect(opt).await?;
+
+    // Run database migrations
+    Migrator::up(&db_conn, None).await?;
+
+    Ok(db_conn)
 }
