@@ -7,5 +7,6 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         web::scope("/api")
             .configure(product_routes::config)
             .configure(post_routes::config)
+            // .configure(post_routes::config)
     );
 }
