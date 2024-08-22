@@ -1,2 +1,1 @@
-pub mod category_model;
-pub mod product_model;
+pub mod post;
