@@ -23,7 +23,6 @@ pub async fn connect_to_db() -> Result<DatabaseConnection, DbErr> {
 
     let db_conn = Database::connect(opt).await?;
 
-    // Run database migrations
     Migrator::up(&db_conn, None).await?;
 
     Ok(db_conn)

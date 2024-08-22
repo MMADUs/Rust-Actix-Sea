@@ -11,7 +11,7 @@
 `sea-orm-cli migrate fresh`
 
 # Generate entity files of database `actixdb` to `src/internal/entity`
-`sea-orm-cli generate entity -o src/internal/entity`
+`sea-orm-cli generate entity --with-serde both -o src/internal/entity`
 
 # CLI Docs help
 `sea-orm-cli -h`
