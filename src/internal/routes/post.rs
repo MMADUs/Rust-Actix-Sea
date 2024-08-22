@@ -1,8 +1,9 @@
-use actix_web::{web, HttpResponse, Responder};
+use actix_web::{web, HttpResponse, Responder, Error};
 use actix_web::error::{ErrorInternalServerError};
 use sea_orm::{ActiveModelTrait, DatabaseConnection, DeleteResult};
 use sea_orm::{EntityTrait, Set};
 use serde::{Deserialize, Serialize};
+use validator::{Validate, ValidationErrors};
 use crate::internal::entity::post::{ActiveModel as PostActiveModel, Entity as PostEntity, Model as PostModel, Model};
 
 pub fn config(cfg: &mut web::ServiceConfig) {
@@ -16,16 +17,22 @@ pub fn config(cfg: &mut web::ServiceConfig) {
     );
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Validate)]
 struct PostRequest {
+    #[validate(length(min = 5, max = 20, message = "Title must be between 5 and 20 characters"))]
     title: String,
+    #[validate(length(min = 1, message = "Text cannot be empty"))]
     text: String,
 }
 
 async fn create_post(
     db: web::Data<DatabaseConnection>,
     post: web::Json<PostRequest>,
-) -> impl Responder {
+) -> Result<impl Responder, Error> {
+    if let Err(errors) = post.validate() {
+        return Ok(HttpResponse::BadRequest().json(errors));
+    }
+
     let new_post = PostActiveModel {
         title: Set(post.title.to_owned()),
         text: Set(post.text.to_owned()),
