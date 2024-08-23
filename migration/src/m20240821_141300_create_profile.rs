@@ -27,7 +27,7 @@ impl MigrationTrait for Migration {
 }
 
 #[derive(DeriveIden)]
-enum Profile {
+pub enum Profile {
     Table,
     Id,
     Name,

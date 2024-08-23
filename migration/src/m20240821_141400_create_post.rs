@@ -1,5 +1,7 @@
 use sea_orm_migration::{prelude::*, schema::*};
 
+use crate::m20240821_141300_create_profile::Profile;
+
 #[derive(DeriveMigrationName)]
 pub struct Migration;
 
@@ -14,6 +16,13 @@ impl MigrationTrait for Migration {
                     .col(pk_auto(Post::Id))
                     .col(string(Post::Title))
                     .col(string(Post::Text))
+                    .col(ColumnDef::new(Post::ProfileId).integer().not_null())
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk-post-profile")
+                            .from(Post::Table, Post::ProfileId)
+                            .to(Profile::Table, Profile::Id)
+                    )
                     .to_owned(),
             )
             .await
@@ -27,9 +36,10 @@ impl MigrationTrait for Migration {
 }
 
 #[derive(DeriveIden)]
-enum Post {
+pub enum Post {
     Table,
     Id,
     Title,
     Text,
+    ProfileId
 }
