@@ -16,7 +16,7 @@ impl MigrationTrait for Migration {
                     .col(pk_auto(Post::Id))
                     .col(string(Post::Title))
                     .col(string(Post::Text))
-                    .col(ColumnDef::new(Post::ProfileId).integer().not_null())
+                    .col(integer(Post::ProfileId).not_null())
                     .foreign_key(
                         ForeignKey::create()
                             .name("fk-post-profile")

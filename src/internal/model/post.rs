@@ -7,4 +7,6 @@ pub struct PostRequest {
     pub title: String,
     #[validate(length(min = 1, message = "Text cannot be empty"))]
     pub text: String,
+    #[validate(range(min = 1, message = "Profile ID must be a positive integer"))]
+    pub profile_id: i32,
 }

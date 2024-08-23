@@ -12,6 +12,7 @@ dependencies = [
  "migration",
  "sea-orm",
  "serde",
+ "serde_json",
  "tokio",
  "validator",
 ]

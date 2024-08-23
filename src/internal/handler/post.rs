@@ -5,12 +5,13 @@ use sea_orm::{EntityTrait, Set};
 use validator::{Validate};
 
 use crate::internal::model::post::{PostRequest};
-use crate::internal::entity::post::{ActiveModel as PostActiveModel, Entity as PostEntity, Model as PostModel, Model};
+use crate::internal::entity::profile::{ActiveModel as ProfileActiveModel, Entity as ProfileEntity, Model as ProfileModel};
+use crate::internal::entity::post::{ActiveModel as PostActiveModel, Entity as PostEntity, Model as PostModel};
 
 pub async fn create_post(
     db: web::Data<DatabaseConnection>,
     post: web::Json<PostRequest>,
-) -> Result<impl Responder, Error> {
+) -> impl Responder {
     if let Err(errors) = post.validate() {
         return Ok(HttpResponse::BadRequest().json(errors));
     }
@@ -18,6 +19,7 @@ pub async fn create_post(
     let new_post = PostActiveModel {
         title: Set(post.title.to_owned()),
         text: Set(post.text.to_owned()),
+        profile_id: Set(post.profile_id.to_owned()),
         ..Default::default()
     }
         .insert(db.get_ref())
@@ -33,11 +35,25 @@ pub async fn get_posts(
     db: web::Data<DatabaseConnection>,
 ) -> impl Responder {
     let posts_result = PostEntity::find()
+        .find_with_related(ProfileEntity)
         .all(db.get_ref())
         .await;
 
     match posts_result {
-        Ok(posts) => Ok(HttpResponse::Ok().json(posts)),
+        Ok(result) => {
+            let formatted_result: Vec<_> = result
+                .into_iter()
+                .map(|(post, profile)| {
+                    let mut post_json = serde_json::to_value(&post).unwrap();
+                    if let Some(profile) = profile.first() {
+                        post_json["profile"] = serde_json::to_value(profile).unwrap();
+                    }
+                    post_json
+                })
+                .collect();
+
+            Ok(HttpResponse::Ok().json(formatted_result))
+        },
         Err(err) => Err(ErrorInternalServerError(err)),
     }
 }
@@ -71,6 +87,7 @@ pub async fn update_post(
             let mut new_post: PostActiveModel = existing_post.into();
             new_post.title = Set(post.title.to_owned());
             new_post.text = Set(post.text.to_owned());
+            new_post.profile_id = Set(post.profile_id.to_owned());
 
             let updated_post = new_post
                 .update(db.get_ref())

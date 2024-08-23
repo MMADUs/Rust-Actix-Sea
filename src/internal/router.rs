@@ -1,11 +1,11 @@
 use actix_web::web;
 
-use crate::internal::routes::{post};
+use crate::internal::routes;
 
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/api")
-            .configure(post::config)
-            // .configure(post_routes::config)
+            .configure(routes::post::config)
+            .configure(routes::profile::config)
     );
 }
