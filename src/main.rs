@@ -1,6 +1,6 @@
 mod internal;
 
-use actix_web::{web, App, HttpServer};
+use actix_web::{web, App, HttpServer, middleware};
 
 use internal::config::db::connect_to_db;
 use internal::router::config;
@@ -12,6 +12,9 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(db_conn.clone()))
+            .wrap(middleware::Logger::default())
+            .wrap(middleware::Compress::default())
+            .wrap(middleware::NormalizePath::new(middleware::TrailingSlash::Trim))
             .configure(config)
     })
         .bind("127.0.0.1:8080")?
