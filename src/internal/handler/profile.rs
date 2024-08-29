@@ -1,4 +1,4 @@
-use actix_web::{web, HttpResponse, Responder, Error};
+use actix_web::{web, HttpResponse, Responder, Error, HttpRequest, HttpMessage};
 use actix_web::error::{ErrorInternalServerError};
 use sea_orm::{ActiveModelTrait, DatabaseConnection, DeleteResult};
 use sea_orm::{EntityTrait, Set};
@@ -33,7 +33,13 @@ pub async fn create_profile(
 
 pub async fn get_profiles(
     db: web::Data<DatabaseConnection>,
+    req: HttpRequest,
 ) -> impl Responder {
+    match req.extensions().get::<String>() {
+        Some(value) => println!("Value from middleware: {}", value),
+        None => println!("No value received"),
+    };
+
     let profiles_result = ProfileEntity::find()
         .find_with_related(PostEntity)
         .all(db.get_ref())

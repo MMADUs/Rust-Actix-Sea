@@ -1,1 +1,2 @@
-pub mod log;
+pub mod log1;
+pub mod log2;
