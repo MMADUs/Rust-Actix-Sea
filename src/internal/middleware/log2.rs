@@ -40,9 +40,12 @@ where
 
     fn call(&self, mut req: ServiceRequest) -> Self::Future {
         let value_from_middleware1 = req.extensions().get::<String>().cloned();
-        if let Some(value) = value_from_middleware1 {
-            println!("Middleware2: Received value from Middleware1: {}", value);
-            // req.extensions_mut().insert(format!("Modified by Middleware2: {}", value));
+        match value_from_middleware1 {
+            Some(value) => {
+                println!("Middleware2: Received value from Middleware1: {}", value);
+                req.extensions_mut().insert(format!("Modified by Middleware2: {}", value));
+            },
+            None => (),
         }
 
         let fut = self.service.call(req);
