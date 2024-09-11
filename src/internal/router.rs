@@ -7,5 +7,6 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         web::scope("/api")
             .configure(routes::post::config)
             .configure(routes::profile::config)
+            .configure(routes::user::config)
     );
 }

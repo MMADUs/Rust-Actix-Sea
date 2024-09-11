@@ -7,4 +7,6 @@ pub struct ProfileRequest {
     pub name: String,
     #[validate(length(min = 1, message = "Bio cannot be empty"))]
     pub bio: String,
+    #[validate(range(min = 1, message = "User ID must be a positive integer"))]
+    pub user_id: i32,
 }

@@ -1,6 +1,6 @@
 use sea_orm_migration::{prelude::*, schema::*};
 
-use crate::m20240821_141300_create_profile::Profile;
+use crate::m20240821_141300_profile::Profile;
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;
